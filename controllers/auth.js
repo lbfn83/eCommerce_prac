@@ -4,6 +4,7 @@ exports.getLogin = (req, res, next) => {
   //     .split(';')[1]
   //     .trim()
   //     .split('=')[1] === 'true';
+  console.log("session");
   console.log(req.session);
   console.log(req.session.isLoggedIn);
   res.render('auth/login', {
@@ -16,5 +17,11 @@ exports.getLogin = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   // you can add any key here
   req.session.isLoggedIn = true;
+  res.redirect('/');
+};
+
+exports.getLogout = (req, res, next) => {
+  // you can add any key here
+  req.session.destroy();
   res.redirect('/');
 };

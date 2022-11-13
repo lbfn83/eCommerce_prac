@@ -33,25 +33,28 @@ app.use(
 // When every request occurs it always goes through this middleware
 app.use((req, res, next) => {
   
-  Session.findById(req.sessionID)
-    .then(session=>{
-      console.log("session :",session);
-      if(session)
-      {
-        console.log("the session found")
-      }else
-      {
-        console.log("there is no session found")
-      }
-    })
-
-  // console.log(req);
-  // User.findById('5bab316ce0a7c75f783cb8a8')
-  //   .then(user => {
-  //     req.user = user;
+  // Session.findById(req.sessionID)
+  //   .then(session=>{
+  //     console.log("session :",session);
+  //     if(session)
+  //     {
+  //       console.log("the session found");
+  //       req.isLoggedIn = true;
+  //     }else
+  //     {
+  //       console.log("there is no session found");
+  //       req.isLoggedIn = false;
+  //     }
   //     next();
   //   })
-  //   .catch(err => console.log(err));
+
+  // console.log(req);
+  User.findById('5bab316ce0a7c75f783cb8a8')
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
   
 });
 
