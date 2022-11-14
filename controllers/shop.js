@@ -46,9 +46,10 @@ exports.getIndex = (req, res, next) => {
       console.log(err);
     });
 };
-
-exports.getCart = (req, res, next) => {
-  console.log('user : ', req.user);
+// the reason why I got this populate().exec() is not a function.. 
+// is that await was not defined in here
+exports.getCart = async (req, res, next) => {
+  console.log('user : ', req.user.cart.items);
   if (!req.user) {
 
     res.status(404).render('404', {
@@ -60,38 +61,40 @@ exports.getCart = (req, res, next) => {
     console.log('getCart Error!!!');
 
   } else {
-    console.log('getCart!!')
-    console.log(req.user.populated('cart.items.productId'))
-    // user is defined in app.js at the stage
-    if (req.user.populated('cart.items.productId') === undefined ) {
 
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: [],
-        isAuthenticated: req.session.isLoggedIn
-      });
+    // unless you populate the user record, populated will always return undefined 
+    // if (req.user.populated('cart.items.productId') === undefined ) {
+    /*
+    var test = undefined;
+    test = await req.user.
+      populate('cart.items.productId');
 
-    } else {
-      req.user
-        .populate('cart.items.productId')
-        .exec(function (err, user) {
+    console.log("Populated cart items : ", test.cart.items);
+    console.log("Populated? :", test.populated('cart.items.productId'));
+    */
+    // exec is not supposed to be used in here. 
+    // test.cart.items.exec(async data => console.log("exec test : ", await data))
 
-
-          const products = user.cart.items;
-          res.render('shop/cart', {
-            path: '/cart',
-            pageTitle: 'Your Cart',
-            products: products,
-            isAuthenticated: req.session.isLoggedIn
-          });
-        })
-        .catch(err => console.log(err));
-    }
+    await req.user.
+      populate('cart.items.productId').
+      then(user => {
+        console.log("then test : ", user);
+        const products = user.cart.items;
+        res.render('shop/cart', {
+          path: '/cart',
+          pageTitle: 'Your Cart',
+          products: products,
+          isAuthenticated: req.session.isLoggedIn
+        });
+      }).
+      catch(err => console.log(err));
   }
+};
   // execPopulate() has now been removed:
   // https://stackoverflow.com/questions/67157818/why-is-execpopulate-method-required-in-mongoose-for-populating-an-existing-docum
 
+  // execPopulate 는 chainable한 populate를 실행하고자 할 때 사용되었던 method로 확인됨
+  // exec에 내가 집착한 이유는... 딱히 명확한 근거가 있어서 했던것이 아닌듯
   // .execPopulate()
   // .then(user => {
   //   const products = user.cart.items;
@@ -104,7 +107,7 @@ exports.getCart = (req, res, next) => {
   // })
   // .catch(err => console.log(err));
 
-};
+
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
@@ -129,10 +132,9 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
-exports.postOrder = (req, res, next) => {
-  req.user
+exports.postOrder = async (req, res, next) => {
+  await req.user
     .populate('cart.items.productId')
-    .execPopulate()
     .then(user => {
       const products = user.cart.items.map(i => {
         return { quantity: i.quantity, product: { ...i.productId._doc } };
