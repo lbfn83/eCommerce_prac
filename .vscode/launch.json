@@ -1,0 +1,14 @@
+// https://stackoverflow.com/questions/47167457/debug-single-javascript-file-in-visual-studio-code
+{
+    "configurations": [
+        {
+            "name": "Launch Program",
+            "program": "${file}",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        }
+    ]
+}
