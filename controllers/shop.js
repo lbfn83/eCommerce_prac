@@ -32,7 +32,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  console.log( req.session.isLoggedIn === true)
+  console.log(req.session.isLoggedIn === true)
   Product.find()
     .then(products => {
       res.render('shop/index', {
@@ -48,20 +48,62 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  console.log(req)
-  req.user
-    .populate('cart.items.productId')
-    .execPopulate()
-    .then(user => {
-      const products = user.cart.items;
+  console.log('user : ', req.user);
+  if (!req.user) {
+
+    res.status(404).render('404', {
+      pageTitle: 'getCart Error',
+      path: '/404',
+      isAuthenticated: req.session.isLoggedIn
+    });
+    res.end();
+    console.log('getCart Error!!!');
+
+  } else {
+    console.log('getCart!!')
+    console.log(req.user.populated('cart.items.productId'))
+    // user is defined in app.js at the stage
+    if (req.user.populated('cart.items.productId') === undefined ) {
+
       res.render('shop/cart', {
         path: '/cart',
         pageTitle: 'Your Cart',
-        products: products,
+        products: [],
         isAuthenticated: req.session.isLoggedIn
       });
-    })
-    .catch(err => console.log(err));
+
+    } else {
+      req.user
+        .populate('cart.items.productId')
+        .exec(function (err, user) {
+
+
+          const products = user.cart.items;
+          res.render('shop/cart', {
+            path: '/cart',
+            pageTitle: 'Your Cart',
+            products: products,
+            isAuthenticated: req.session.isLoggedIn
+          });
+        })
+        .catch(err => console.log(err));
+    }
+  }
+  // execPopulate() has now been removed:
+  // https://stackoverflow.com/questions/67157818/why-is-execpopulate-method-required-in-mongoose-for-populating-an-existing-docum
+
+  // .execPopulate()
+  // .then(user => {
+  //   const products = user.cart.items;
+  //   res.render('shop/cart', {
+  //     path: '/cart',
+  //     pageTitle: 'Your Cart',
+  //     products: products,
+  //     isAuthenticated: req.session.isLoggedIn
+  //   });
+  // })
+  // .catch(err => console.log(err));
+
 };
 
 exports.postCart = (req, res, next) => {
@@ -73,7 +115,8 @@ exports.postCart = (req, res, next) => {
     .then(result => {
       console.log(result);
       res.redirect('/cart');
-    });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {

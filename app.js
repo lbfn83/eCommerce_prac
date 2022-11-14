@@ -10,7 +10,7 @@ const errorController = require('./controllers/error');
 
 const User = require('./models/user');
 const Session = require('./models/session');
-const MONGODB_URI = 'mongodb://localhost:27017/shop?retryWrites=true'
+const MONGODB_URI = 'mongodb://localhost:27017/shop3?retryWrites=true'
 const app = express();
 const store = new MongoDBStore({
   uri : MONGODB_URI ,
@@ -49,8 +49,9 @@ app.use((req, res, next) => {
   //   })
 
   // console.log(req);
-  User.findById('5bab316ce0a7c75f783cb8a8')
+  User.findById('63724f028809d880120c702a')
     .then(user => {
+      console.log('user check: ',typeof user, "::", user);
       req.user = user;
       next();
     })

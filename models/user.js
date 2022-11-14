@@ -1,3 +1,4 @@
+const { ObjectID } = require('bson');
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -26,6 +27,8 @@ const userSchema = new Schema({
 });
 
 userSchema.methods.addToCart = function(product) {
+  console.log('product : ', product)
+  console.log('this : ' , this)
   const cartProductIndex = this.cart.items.findIndex(cp => {
     return cp.productId.toString() === product._id.toString();
   });
@@ -37,14 +40,17 @@ userSchema.methods.addToCart = function(product) {
     updatedCartItems[cartProductIndex].quantity = newQuantity;
   } else {
     updatedCartItems.push({
-      productId: product._id,
+      productId: product,
       quantity: newQuantity
     });
   }
+  // This part might be as problem
+  console.log('updatedCart : ', updatedCartItems)
   const updatedCart = {
     items: updatedCartItems
   };
-  this.cart = updatedCart;
+  this.cart.items = [...updatedCartItems];
+  // this.cart = updatedCart;
   return this.save();
 };
 
