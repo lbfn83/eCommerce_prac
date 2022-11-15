@@ -49,14 +49,21 @@ app.use((req, res, next) => {
   //   })
 
   // console.log(req);
-  User.findById('63724f028809d880120c702a')
-    .then(user => {
-      console.log('user check: ',typeof user, "::", user);
-      req.user = user;
-      next();
-    })
-    .catch(err => console.log(err));
-  
+  console.log(req.session)
+  if(req.session.user)
+  {
+    User.findById(req.session.user._id)
+      .then(user => {
+        console.log('user check: ',typeof user, "::", user);
+        req.user = user;
+        next();
+      })
+      .catch(err => console.log(err));
+  }
+  else{
+    console.log("what!@")
+    next();
+  }
 });
 
 app.use('/admin', adminRoutes);
