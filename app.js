@@ -49,7 +49,7 @@ app.use((req, res, next) => {
   //   })
 
   // console.log(req);
-  console.log(req.session)
+  // console.log(req.session)
   if(req.session.user)
   {
     User.findById(req.session.user._id)
@@ -61,7 +61,7 @@ app.use((req, res, next) => {
       .catch(err => console.log(err));
   }
   else{
-    console.log("what!@")
+
     next();
   }
 });
