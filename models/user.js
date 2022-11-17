@@ -4,14 +4,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true
-  },
+
   email: {
     type: String,
     required: true
   },
+  password: {
+    type: String,
+    required: true
+  }
+  ,
   cart: {
     items: [
       {
@@ -27,8 +29,8 @@ const userSchema = new Schema({
 });
 
 userSchema.methods.addToCart = function(product) {
-  console.log('product : ', product)
-  console.log('this : ' , this)
+  // console.log('product : ', product)
+  // console.log('this : ' , this)
   const cartProductIndex = this.cart.items.findIndex(cp => {
     return cp.productId.toString() === product._id.toString();
   });
@@ -45,7 +47,7 @@ userSchema.methods.addToCart = function(product) {
     });
   }
   // This part might be as problem
-  console.log('updatedCart : ', updatedCartItems)
+  // console.log('updatedCart : ', updatedCartItems)
   const updatedCart = {
     items: updatedCartItems
   };
@@ -187,11 +189,11 @@ module.exports = mongoose.model('User', userSchema);
 //       .collection('users')
 //       .findOne({ _id: new ObjectId(userId) })
 //       .then(user => {
-//         console.log(user);
+        // console.log(user);
 //         return user;
 //       })
 //       .catch(err => {
-//         console.log(err);
+        // console.log(err);
 //       });
 //   }
 // }

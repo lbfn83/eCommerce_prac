@@ -1,3 +1,6 @@
+const bcrypt = require('bcrypt');
+
+
 const User = require('../models/user');
 exports.getLogin = (req, res, next) => {
   //   const isLoggedIn = req
@@ -54,21 +57,65 @@ exports.getLogout = (req, res, next) => {
 
 exports.getSignup = (req, res, next) => {
   res.render('auth/signup', {
-    isAuthenticated: true,
     path: '/signup',
-    pageTitle: 'Signup'
+    pageTitle: 'Signup',
+    isAuthenticated: false,
   })
 }
 
-exports.postSignup = (req, res, next) => {
+exports.postSignup = async (req, res, next) => {
+  const email = req.body.email;
+  const password = await bcrypt.hash(req.body.password, 12);
+  const confirmPassword = req.body.confirmPassword;
+  // each hash attempt will yield slightly different string
+  // console.log(password);
+  // console.log(await bcrypt.hash(confirmPassword, 12));
+
   User.find({ "email": req.body.email }).
-    then(user => {
-      console.log("user: ", user)
-      if(user.length)
-      {
-        res.redirect("/");
+    then(async (userDoc) => {
+      console.log("userDoc: ", userDoc);
+
+      // TODO : gotta send different message for each case
+      if (userDoc.length) {
+        console.log("already registered user");
+        return res.redirect("/signup");
       }
+      else if (await bcrypt.compare(confirmPassword, password) === false) {
+        console.log("two different passwords are entered");
+        return res.redirect("/signup");
+      }
+
+
       
+
+      // await bcrypt.compare(confirmPassword, password).
+      //   then(result => {
+      //     //return  true or false 
+      //     console.log("result : ", result);
+      //   }).
+      //   catch(err => { console.log("two diff passwords", err) });
+      /*
+
+      else if(password.localeCompare(confirmPassword) !== 0)
+      {
+        console.log("two different passwords are entered");
+        return res.redirect("/signup");
+      }*/
+
+      // User.create({
+      //   email : email,
+      //   password : password,
+      //   cart : {items: [] }
+      // })
+      const user = new User({
+        email: email,
+        password: password,
+        cart: { items: [] }
+      });
+      await user.save().
+        then(result => {
+          return res.redirect("/login");
+        });
     }).
     catch(err => console.log(err));
   console.log("request: ", req.body);
