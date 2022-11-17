@@ -54,7 +54,7 @@ app.use((req, res, next) => {
   {
     User.findById(req.session.user._id)
       .then(user => {
-        console.log('user check: ',typeof user, "::", user);
+        // console.log('user check: ',typeof user, "::", user);
         req.user = user;
         next();
       })

@@ -19,29 +19,37 @@ exports.getLogin = (req, res, next) => {
 
 exports.postLogin = (req, res, next) => {
 
-  User.findOne({ email: req.body.email }).
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User.findOne({ email: email }).
     // session에 변수가 계속 제대로 저장되지 않는 에러가 발생했었는데...
     // 강사가 답을 알려줌..
     // 실제로 mongodbstore는 좀 더딜 수 있거든..
     // 그래서 save를 해줘야 하는 경우가 있다.
     // redirect work independtly from the session so it might be requried
-    then(user => {
+    then(async user => {
       try {
 
-        console.log('user : ', user)
+        // console.log('user : ', user)
         if (user) {
-          req.session.user = user;
-          req.session.isLoggedIn = true;
-          req.session.save((err) => {
-            console.log("error ::: ", err);
-            res.redirect('/');
-          });
-        } else {
-          res.redirect('/');
+          await bcrypt.compare(password, user.password).then(doMatch => {
+            if (doMatch) {
+              req.session.user = user;
+              req.session.isLoggedIn = true;
+              return req.session.save((err) => {
+                if(err)
+                {
+                  console.log("postlogin error ::: ", err);
+                }
+                res.redirect('/');
+              });
+            }
+            res.redirect('/login');
+          })
+
         }
       }
-      // req.session.isLoggedIn = true;
-
       catch (err) {
         console.log("error ", err);
       }
@@ -121,4 +129,4 @@ exports.postSignup = async (req, res, next) => {
       // })
     }).
     catch(err => console.log(err));
-  }
+}
