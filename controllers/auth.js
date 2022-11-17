@@ -65,28 +65,46 @@ exports.getSignup = (req, res, next) => {
 
 exports.postSignup = async (req, res, next) => {
   const email = req.body.email;
-  const password = await bcrypt.hash(req.body.password, 12);
+  const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
   // each hash attempt will yield slightly different string
   // console.log(password);
   // console.log(await bcrypt.hash(confirmPassword, 12));
 
+  // TODO : gotta send different message for each case
+  // 1. string compare
+  // 2. already registered user
+  if (password.localeCompare(confirmPassword) !== 0) {
+    console.log("two different passwords are entered");
+    return res.redirect("/signup");
+  }
+
   User.find({ "email": req.body.email }).
     then(async (userDoc) => {
       console.log("userDoc: ", userDoc);
 
-      // TODO : gotta send different message for each case
       if (userDoc.length) {
         console.log("already registered user");
         return res.redirect("/signup");
       }
-      else if (await bcrypt.compare(confirmPassword, password) === false) {
-        console.log("two different passwords are entered");
-        return res.redirect("/signup");
-      }
 
+      return bcrypt.hash(req.body.password, 12).
+        then(async hashedPWD => {
+          const user = new User({
+            email: email,
+            password: hashedPWD,
+            cart: { items: [] }
+          });
+          await user.save().
+            then(result => {
+              return res.redirect("/login");
+            });
+        })
+      // else if (await bcrypt.compare(confirmPassword, password) === false) {
+      //   console.log("two different passwords are entered");
+      //   return res.redirect("/signup");
+      // }
 
-      
 
       // await bcrypt.compare(confirmPassword, password).
       //   then(result => {
@@ -94,29 +112,13 @@ exports.postSignup = async (req, res, next) => {
       //     console.log("result : ", result);
       //   }).
       //   catch(err => { console.log("two diff passwords", err) });
-      /*
 
-      else if(password.localeCompare(confirmPassword) !== 0)
-      {
-        console.log("two different passwords are entered");
-        return res.redirect("/signup");
-      }*/
-
+      // **Another way to create User 
       // User.create({
       //   email : email,
       //   password : password,
       //   cart : {items: [] }
       // })
-      const user = new User({
-        email: email,
-        password: password,
-        cart: { items: [] }
-      });
-      await user.save().
-        then(result => {
-          return res.redirect("/login");
-        });
     }).
     catch(err => console.log(err));
-  console.log("request: ", req.body);
-}
+  }
