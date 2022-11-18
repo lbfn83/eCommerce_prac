@@ -9,7 +9,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const errorController = require('./controllers/error');
 
 const User = require('./models/user');
-const Session = require('./models/session');
+// const Session = require('./models/session');
 const MONGODB_URI = 'mongodb://localhost:27017/shop3?retryWrites=true'
 const app = express();
 const store = new MongoDBStore({
