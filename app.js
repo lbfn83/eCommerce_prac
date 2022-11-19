@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csurf = require('csurf');
+const logger = require('morgan');
 // const cookieParser = require('cookie-parser');
 
 const errorController = require('./controllers/error');
@@ -28,6 +29,7 @@ app.set('views', 'views');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
+app.use(logger('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
@@ -71,7 +73,13 @@ app.use((req, res, next) => {
     next();
   }
 });
-
+// https://teamtreehouse.com/community/resrender-passing-in-object-vs-resrenderlocals-variables
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  // middleware SHOULD have this, man...
+  next();
+})
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -96,6 +104,7 @@ mongoose
     //   }
     // });
     app.listen(3000);
+
   })
   .catch(err => {
     console.log(err);

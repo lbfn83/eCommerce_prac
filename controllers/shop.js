@@ -9,7 +9,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: 'All Products',
         path: '/products',
-        isAuthenticated: req.session.isLoggedIn
+
       });
     })
     .catch(err => {
@@ -25,7 +25,7 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: '/products',
-        isAuthenticated: req.session.isLoggedIn
+
       });
     })
     .catch(err => console.log(err));
@@ -33,14 +33,14 @@ exports.getProduct = (req, res, next) => {
 
 exports.getIndex = (req, res, next) => {
   console.log("cookie?? ",req );
-  console.log("getIndex : seesion exists?",req.session.isLoggedIn === true)
+
   Product.find()
     .then(products => {
       res.render('shop/index', {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
-        isAuthenticated: req.session.isLoggedIn
+
       });
     })
     .catch(err => {
@@ -56,7 +56,7 @@ exports.getCart = async (req, res, next) => {
     res.status(404).render('404', {
       pageTitle: 'getCart Error',
       path: '/404',
-      isAuthenticated: req.session.isLoggedIn
+
     });
     res.end();
     console.log('getCart Error!!!');
@@ -85,7 +85,7 @@ exports.getCart = async (req, res, next) => {
           path: '/cart',
           pageTitle: 'Your Cart',
           products: products,
-          isAuthenticated: req.session.isLoggedIn
+
         });
       }).
       catch(err => console.log(err));
@@ -165,7 +165,6 @@ exports.getOrders = (req, res, next) => {
         path: '/orders',
         pageTitle: 'Your Orders',
         orders: orders,
-        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch(err => console.log(err));
