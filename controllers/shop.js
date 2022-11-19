@@ -32,6 +32,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  console.log("cookie?? ",req );
   console.log("getIndex : seesion exists?",req.session.isLoggedIn === true)
   Product.find()
     .then(products => {
