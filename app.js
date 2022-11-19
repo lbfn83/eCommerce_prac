@@ -19,7 +19,7 @@ const store = new MongoDBStore({
   uri : MONGODB_URI ,
   collection: 'sessions'
 })
-// const csrfProtection = csurf({});
+const csrfProtection = csurf({});
 // console.log("store : ", store);
 
 app.set('view engine', 'ejs');
@@ -34,7 +34,7 @@ app.use(
   session({ secret: 'my secret', resave: false, saveUninitialized: false, store: store })
 );
 // should define csurf package after session, since csrf utilize the session
-// app.use(csrfProtection); 
+app.use(csrfProtection); 
 // app.use(cookieParser());
 // When every request occurs it always goes through this middleware
 app.use((req, res, next) => {
