@@ -9,11 +9,15 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csurf = require('csurf');
 const logger = require('morgan');
 // const cookieParser = require('cookie-parser');
-
-const errorController = require('./controllers/error');
+const flash = require('connect-flash');
 
 const User = require('./models/user');
+const errorController = require('./controllers/error');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 // const Session = require('./models/session');
+
 const MONGODB_URI = 'mongodb://localhost:27017/shop3?retryWrites=true'
 const app = express();
 const store = new MongoDBStore({
@@ -26,9 +30,6 @@ const csrfProtection = csurf({});
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
-const authRoutes = require('./routes/auth');
 app.use(logger('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -37,10 +38,17 @@ app.use(
 );
 // should define csurf package after session, since csrf utilize the session
 app.use(csrfProtection); 
+app.use(flash());
 // app.use(cookieParser());
 // When every request occurs it always goes through this middleware
+var cnt = 0
 app.use((req, res, next) => {
-  
+  /** connect-flash test, once data is queried, the buffer is emptied*/
+  /**
+  req.flash("count", cnt++);
+  console.log("message" ,   req.flash('count'));
+  console.log("message" ,   req.flash('count'));
+   */
   // Session.findById(req.sessionID)
   //   .then(session=>{
   //     console.log("session :",session);

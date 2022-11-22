@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { exists } = require('../models/user');
 
 
 const User = require('../models/user');
@@ -12,7 +13,8 @@ exports.getLogin = (req, res, next) => {
   // console.log(req.csrfToken());
   res.render('auth/login', {
     path: '/login',
-    pageTitle: 'Login'
+    pageTitle: 'Login',
+    error: req.flash('error')
   });
 };
 
@@ -44,9 +46,15 @@ exports.postLogin = (req, res, next) => {
                 res.redirect('/');
               });
             }
+            // TODO : here you should render something like error message
+            // you can utilize locals variable if it was render function
+            // this is actually redirect so we need something like temp buffer
             res.redirect('/login');
           })
-
+        }else{
+          console.log('user doesn\'t exists');
+          req.flash('error', 'user doesn\'t exists');
+          return res.redirect('/login');
         }
       }
       catch (err) {
