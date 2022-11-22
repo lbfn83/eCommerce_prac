@@ -39,9 +39,12 @@ app.use('/', indexRouter);
 
 // https://simonplend.com/how-to-send-consistent-error-responses-from-your-express-api/
 // catch 404 and forward to error handler
-// app.use(function(req, res, next){
-//     next(createError(404));
-// });
+app.use(function(req, res, next){
+  const error = createError(404,"Invalid filter");
+  console.log(error)  
+  console.log()  
+  next(error);
+});
 
 //express defualt error handler
 // https://expressjs.com/en/guide/error-handling.html#the-default-error-handler
