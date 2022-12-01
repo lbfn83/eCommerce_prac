@@ -1,0 +1,71 @@
+const chai = require('chai');
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
+const proxyquire = require('proxyquire');
+const routes = require('../routes');
+
+
+chai.use(sinonChai);
+describe('src/routes/myRoute', () => {
+  const mockSomeAsync = sinon.stub();
+  const myRoute = proxyquire('../routes', {
+    './someAsync': mockSomeAsync
+  });
+  var stubCNT = 0;
+  var stubCNT2 = 0;
+  mockSomeAsync.callsFake(() => {
+    stubCNT = stubCNT+1;
+  })
+  
+
+  const req = { body: 'some body' };
+  const res = { json: sinon.stub(routes,  "res.json") };
+
+  res.json.callsFake(() => {() => {
+    stubCNT2 = stubCNT2+1;
+  }})
+  const next = sinon.spy()
+  const resetStubs = () => {
+    res.json.resetHistory()
+    next.resetHistory()
+  }
+  const result = 'some result'
+  context('no errors', () => {
+    before(async () => {
+      mockSomeAsync.resolves(next);
+    
+      const a = await myRoute(req, res, next);
+      console.log(await a)
+    })
+    after(resetStubs)
+    it('called someAsync with the right data', () => {
+      chai.expect(mockSomeAsync).to.have.been.calledWith(req.body) //
+    })
+    it('called res.json with the right data', () => {
+      console.log(res.json)
+      // chai.expect(res.json).to.have.been.calledWith('[Function (anonymous)]')
+      chai.expect(res.json).to.have.been.caller()
+    })
+    it("didn't call next", () => {
+      chai.expect(next).not.to.have.been.called
+    })
+  })
+  context('has errors', () => {
+    const error = "some error";
+    before(async () => {
+      mockSomeAsync.rejects(error)
+      await myRoute(req, res, next)
+    })
+    after(resetStubs)
+    it('called someAsync with the right data', () => {
+      chai.expect(mockSomeAsync).to.have.been.calledWith(req.body)
+    })
+    it("didn't call res.json", () => {
+      chai.expect(res.json).not.to.have.been.called
+    })
+    it('called next with the error', () => {
+      console.log("counter " , stubCNT, stubCNT2)
+      chai.expect(next).to.have.been.calledWith(error)
+    })
+  })
+})
